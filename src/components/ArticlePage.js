@@ -1,43 +1,42 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { makeEmojiList } from "../utils";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import useQuery from "../hooks/useQuery";
 
 function ArticlePage() {
-  // fetch data for a post
   const { id } = useParams();
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [post, setPost] = useState(null);
+  const { data: post, isLoaded } = useQuery(`http://localhost:4000/posts/${id}`);
+  
+  useDocumentTitle(post ? `Underreacted | ${post.title}` : "Underreacted");
 
-  const url = `http://localhost:4000/posts/${id}`;
   useEffect(() => {
-    setIsLoaded(false);
-    fetch(url)
-      .then((r) => r.json())
-      .then((post) => {
-        setPost(post);
-        setIsLoaded(true);
-      });
-  }, [url]);
+    // Fetch additional data or perform actions based on the 'id'
+    // For instance:
+    // fetch(`http://localhost:4000/posts/${id}`)
+    //   .then((response) => response.json())
+    //   .then((postData) => {
+    //     // Handle the received post data as needed
+    //   })
+    //   .catch((error) => {
+    //     // Handle errors if any
+    //   });
+  }, [id]);
 
-  // set the document title
-  const pageTitle = post ? `Underreacted | ${post.title}` : "Underreacted";
-  useEffect(() => {
-    document.title = pageTitle;
-  }, [pageTitle]);
-
-  if (!isLoaded) return <h3>Loading...</h3>;
-
-  const { minutes, title, date, preview } = post;
-  const emojis = makeEmojiList(minutes);
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <article>
-      <h3>{title}</h3>
-      <small>
-        {date} • {emojis} {minutes} min read
-      </small>
-      <p>{preview}</p>
-    </article>
+    <div>
+      <h1>Article Page</h1>
+      {post && (
+        <div>
+          <h2>{post.title}</h2>
+          <p>{post.body}</p>
+        </div>
+      )}
+    </div>
   );
 }
 
